@@ -30,3 +30,7 @@ Uses CloudFront + Lambda@Edge to route subdomains to a folder inside a bucket.
 ### Usage
 
 Using the S3 cli, copy files to a folder in the bucket name you picked in step 3. To view the deployed site, visit `https://{site-bucket-name}.{domain}.com`
+
+### Credits
+
+Adpated from this [SO answer](https://stackoverflow.com/questions/49812706/serving-a-multitude-of-static-sites-from-a-wildcard-domain-in-aws/49817210#49817210) with updates for SPA routing and Serverless deploy
