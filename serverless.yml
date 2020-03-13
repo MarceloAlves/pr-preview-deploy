@@ -1,0 +1,71 @@
+# Update values marked with "TODO"
+custom:
+  s3Bucket: example.com # TODO: Update This
+  defaultEnvironmentGroup: dev # TODO: Update This
+  stage: ${opt:stage, 'dev'}
+  objectPrefix: '${self:service}-${self:custom.stage}'
+
+service: cloudfront-lambda-edge
+
+plugins:
+  - '@silvermine/serverless-plugin-cloudfront-lambda-edge'
+
+provider:
+  name: aws
+  runtime: nodejs10.x # Lambda@Edge only supports up to 10.x
+
+package:
+  exclude:
+    - 'node_modules/**'
+
+functions:
+  cfLambda:
+    name: '${self:custom.objectPrefix}-origin-request'
+    handler: handler.cloudfront
+    memorySize: 128
+    timeout: 1
+    lambdaAtEdge:
+      distribution: 'WebsiteDistribution'
+      eventType: 'origin-request'
+
+resources:
+  Resources:
+    WebsiteBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: '${self:custom.s3Bucket}'
+        AccessControl: 'PublicRead'
+        WebsiteConfiguration:
+          IndexDocument: 'index.html'
+          ErrorDocument: 'error.html'
+    WebsiteDistribution:
+      Type: 'AWS::CloudFront::Distribution'
+      Properties:
+        DistributionConfig:
+          DefaultCacheBehavior:
+            TargetOriginId: 'WebsiteBucketOrigin'
+            ViewerProtocolPolicy: 'redirect-to-https'
+            DefaultTTL: 300 # five minutes
+            MaxTTL: 300 # five minutes
+            Compress: true
+            ForwardedValues:
+              Headers:
+                - Origin
+                - Host
+              QueryString: false
+              Cookies:
+                Forward: 'none'
+          DefaultRootObject: 'index.html'
+          Enabled: true
+          PriceClass: 'PriceClass_100'
+          HttpVersion: 'http2'
+          Aliases:
+            - example.com # TODO: Update alias
+            - '*.example.com' # TODO: Update alias
+          ViewerCertificate:
+            AcmCertificateArn: arn:aws:acm:us-east-1:000000000000:certificate/00000000-0000-0000-0000-000000000000 # TODO: Generate cert and replace this value
+            SslSupportMethod: sni-only
+          Origins:
+            - Id: 'WebsiteBucketOrigin'
+              DomainName: { 'Fn::GetAtt': ['WebsiteBucket', 'DomainName'] }
+              S3OriginConfig: {}

@@ -1,0 +1,14 @@
+{
+  "name": "pr-preview-deploy",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "author": "Marcelo Alves <selfmadecelo@gmail.com>",
+  "license": "MIT",
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120
+  },
+  "devDependencies": {
+    "@silvermine/serverless-plugin-cloudfront-lambda-edge": "^2.1.1"
+  }
+}
